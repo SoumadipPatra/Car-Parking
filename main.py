@@ -7,8 +7,6 @@ import time
 
 app = FastAPI()
 
-manage = ConnectionManager()
-
 @app.get("/")
 async def root():
     html = """
