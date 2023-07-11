@@ -1,7 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from manager import *
-from methods import *
 
 import hashlib
 import time
