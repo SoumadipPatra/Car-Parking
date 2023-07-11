@@ -169,9 +169,7 @@ async def root():
       </div>
     </div>
   </div>
-  <div class="col-6">
-    <button onclick="scrollToSection('#about')" class="btn btn-primary" >About Us</button>
-  </div>
+ 
   <div class ="Aradhya">
     <br>
     <div  id="about">
