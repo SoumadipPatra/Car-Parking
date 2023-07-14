@@ -7,6 +7,7 @@ import time
 
 app = FastAPI()
 
+
 @app.get("/")
 async def root():
     html = """
@@ -40,7 +41,7 @@ async def root():
         background-color: rgba(224, 224, 255, 0.5);
         height: 24rem;
         padding: 3rem;
-        border
+        border: 0;
       }
 
       .box-title {
@@ -102,6 +103,16 @@ async def root():
 <script>
     const client_id = Date.now();
     var ws = new WebSocket(`wss://multilevel-parking.onrender.com/ws/${ client_id }`);
+    var log = [];
+    const maxLen = 5;
+    
+    function add(x) {
+      log.push(x);
+      
+      if(log.length > maxLen) {
+        log.shift();
+      }
+    } 
 
     ws.onmessage = function(event) {
         let response = event.data;
@@ -122,6 +133,62 @@ async def root():
             const priceResultDiv = document.getElementById("priceResult");
 
             priceResultDiv.innerHTML = `The token is invalid!`;
+        } else if (responseList[0] === 'ENTRY') {
+          const tbody = document.getElementById("tabbody");
+          tbody.innerHTML = ""
+          
+          let log_entry = {
+            'type': 0,
+            'car_number': responseList[1],
+            'token': responseList[2],
+            'floor': responseList[3],
+            'slot': responseList[4],
+            'time': new Date(parseInt(responseList[5]) * 1000)
+          }
+          
+          add(log_entry)
+          
+          for(let i = log.length - 1; i >= 0; i--) {
+            let bgClass = "table-success";
+            if(log[i]['type'] === 1) {
+              bgClass = "table-warning";
+            }
+            tbody.innerHTML += `<tr class="${ bgClass }">
+              <td>${ log[i]['car_number'] }</td>
+              <td>${ log[i]['token'] }</td>
+              <td>${ log[i]['floor'] }</td>
+              <td>${ log[i]['slot'] }</td>
+              <td>${ log[i]['time'].getHours() }:${ log[i]['time'].getMinutes()}:${ log[i]['time'].getSeconds()}</td>
+            </tr>`
+          }
+        } else if (responseList[0] === 'EXIT') {
+          const tbody = document.getElementById("tabbody");
+          tbody.innerHTML = ""
+          
+          let log_entry = {
+            'type': 1,
+            'car_number': responseList[1],
+            'token': responseList[2],
+            'floor': responseList[3],
+            'slot': responseList[4],
+            'time': new Date(parseInt(responseList[5]) * 1000)
+          }
+          
+          add(log_entry)
+          
+          for(let i = log.length - 1; i >= 0; i--) {
+            let bgClass = "table-success";
+            if(log[i]['type'] === 1) {
+              bgClass = "table-warning";
+            }
+            tbody.innerHTML += `<tr class="${ bgClass }">
+              <td>${ log[i]['car_number'] }</td>
+              <td>${ log[i]['token'] }</td>
+              <td>${ log[i]['floor'] }</td>
+              <td>${ log[i]['slot'] }</td>
+              <td>${ log[i]['time'].getHours() }:${ log[i]['time'].getMinutes() }:${ log[i]['time'].getSeconds() }</td>
+            </tr>`
+          }
         }
     }
     
@@ -169,6 +236,21 @@ async def root():
         <br /><br />
         <div id="priceResult"></div>
       </div>
+    </div>
+    <div class = "row">
+      <table class="table">
+        <thead>
+        <tr class="bg-primary">
+          <th scope="col">Car Number</th>
+          <th scope="col">Token</th>
+          <th scope="col">Floor</th>
+          <th scope="col">Slot</th>
+          <th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody id="tabbody">
+        </tbody>
+      </table>
     </div>
   </div>
  
@@ -234,4 +316,4 @@ async def root():
 </html>
 
     """
-    return HTMLResponse(content = html, status_code = 200)        
+    return HTMLResponse(content=html, status_code=200)
