@@ -108,6 +108,8 @@ async def root():
         
         console.log(response);
 
+        console.log(event);
+
         responseList = response.split(' ');
         
         console.log(responseList);
